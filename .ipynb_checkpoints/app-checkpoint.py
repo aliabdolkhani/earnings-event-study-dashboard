@@ -47,13 +47,15 @@ with col1:
 with col2:
     window = st.selectbox("Choose CAR window", list(windows.keys()))
 
+# Determine CAR series for selected window
+car_series = windows[window]
+
 # 4.2 Filter for selected ticker
 ev     = events[events["Ticker"] == ticker].sort_values("Ann Date")
 ar_sub = ar.loc[ev["event_id"].values]
 md     = meta.loc[ev["event_id"].values]  # Surprise indexed by event_id
-car_series = windows[window]
 
-# 5. Key Metrics
+# 4.3 Key Metrics (moved here)
 st.subheader("Key Metrics")
 st.markdown("_Average & most recent abnormal returns around earnings._")
 
@@ -69,6 +71,19 @@ k1.metric(f"Avg {window}",  f"{avg_car:.2%}")
 k2.metric("Last Surprise",  f"{last_surprise:.1%}")
 k3.metric(f"Last {window}", f"{last_car:.2%}")
 k4.metric("# of Events",    f"{n_events}")
+
+# 5. Ranking Section (moved here)
+st.subheader(f"Ranking: Average {window} by Ticker")
+df_rank = (
+    pd.DataFrame({"event_id": car_series.index, "CAR": car_series.values})
+    .merge(events[["event_id","Ticker"]], on="event_id")
+    .groupby("Ticker", as_index=False)["CAR"].mean()
+    .sort_values("CAR", ascending=False)
+)
+st.dataframe(
+    df_rank.rename(columns={"CAR": f"Avg {window}"})
+           .style.format({f"Avg {window}": "{:.1%}"})
+)
 
 # 6. Earnings History Table
 st.subheader("Earnings History")
