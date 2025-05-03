@@ -145,11 +145,13 @@ scatter = alt.Chart(df_sc).mark_circle(size=60).encode(
 ).interactive()
 st.altair_chart(scatter, use_container_width=True)
 
+
 # 9. Build & fit cross-sectional model for selected window
 st.subheader("Forecast Next Event CAR")
 upcoming = pd.read_csv("upcoming_surprises.csv", parse_dates=["Ann Date"])
 upcoming["Surprise"] = pd.to_numeric(upcoming["Surprise"], errors="coerce")
 # use CSV’s built-in event_id
+
 
 # prepare regression target for chosen window
 target = windows[window].rename("CARw")
